@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP32 Web Config</title>
+  <link rel="icon" href="/images/icon.png" type="image/png">
+  <style>
+    :root {
+      --accent1: #1e90ff;
+      --accent2: #00bfff;
+      --sidebar-bg: rgba(255, 255, 255, 0.85);
+      --page-bg: linear-gradient(180deg, #f7f8fa, #e9ecf1);
+      --text: #222;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(6px);
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 25px 10px;
+      box-sizing: border-box;
+    }
+
+    .sidebar img {
+      width: 120px;
+      height: auto;
+      border-radius: 15px;
+      background: #fff;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+      object-fit: contain;
+      padding: 8px;
+      margin-bottom: 20px;
+    }
+
+    .sidebar h2 {
+      margin: 0 0 30px 0;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    nav {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    nav a {
+      text-decoration: none;
+      padding: 12px 18px;
+      margin: 6px 0;
+      border-radius: 12px;
+      color: var(--text);
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    nav a.active {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+    }
+
+    /* Main content */
+    main {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    .card {
+      max-width: 700px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      padding: 30px;
+      backdrop-filter: blur(6px);
+    }
+
+    /* Headings */
+    h1 {
+      font-size: 1.6rem;
+      margin-top: 0;
+    }
+
+    p {
+      color: #444;
+      line-height: 1.5;
+    }
+
+    /* Forms */
+    form label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.1);
+      font-size: 1rem;
+    }
+
+    input::placeholder {
+      color: #999;
+    }
+
+    button {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    /* Hide/Show pages */
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        flex-direction: row;
+        width: 100%;
+        height: auto;
+        justify-content: space-between;
+        padding: 10px 20px;
+      }
+
+      .sidebar img {
+        width: 60px;
+        margin-bottom: 0;
+      }
+
+      nav {
+        flex-direction: row;
+        justify-content: flex-end;
+      }
+
+      nav a {
+        margin: 0 6px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/images/icon.png" alt="Project Icon">
+    </div>
+    <h2>ESP32 Webserver</h2>
+    <nav>
+      <a href="#home" class="active" id="nav-home">🏠 Home</a>
+      <a href="#config" id="nav-config">⚙️ Config</a>
+      <a href="#info" id="nav-info">ℹ️ Info</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main>
+    <div class="card">
+      <!-- Home -->
+      <section id="home" class="page active">
+        <h1>Welcome</h1>
+        <p>This is the ESP32 WiFi configuration interface. Use the Config page to set up WiFi credentials, or view
+          system details on the Info page.</p>
+        <p><b>Tip:</b> If your WiFi network has no password, leave it blank.</p>
+      </section>
+
+      <!-- Config -->
+      <section id="config" class="page">
+        <h1>WiFi Configuration</h1>
+        <p>Enter your WiFi credentials below.</p>
+        <form action="/connect" method="post">
+          <label for="ssid">WiFi Name (SSID):</label>
+          <input type="text" id="ssid" name="ssid" required placeholder="Enter SSID">
+
+          <label for="password">WiFi Password:</label>
+          <input type="password" id="password" name="password" placeholder="If the WiFi has no password, leave empty">
+
+          <button type="submit">CONNECT</button>
+        </form>
+      </section>
+
+      <!-- Info -->
+      <section id="info" class="page">
+        <h1>Device Information</h1>
+        <p><strong>Device:</strong> YOLO UNO (ESP32-S3)</p>
+        <p><strong>Firmware:</strong> Webserver Config</p>
+        <p><strong>AP SSID:</strong> ESP32S3_Setup</p>
+        <p><strong>AP Password:</strong> 12345678</p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const pages = {
+      home: document.getElementById("home"),
+      config: document.getElementById("config"),
+      info: document.getElementById("info"),
+    };
+    const navLinks = {
+      home: document.getElementById("nav-home"),
+      config: document.getElementById("nav-config"),
+      info: document.getElementById("nav-info"),
+    };
+
+    function showPage(name) {
+      Object.values(pages).forEach(p => p.classList.remove("active"));
+      Object.values(navLinks).forEach(n => n.classList.remove("active"));
+      if (pages[name]) {
+        pages[name].classList.add("active");
+        navLinks[name].classList.add("active");
+      }
+    }
+
+    function route() {
+      const hash = location.hash.replace("#", "") || "home";
+      showPage(hash);
+    }
+
+    window.addEventListener("hashchange", route);
+    route();
+  </script>
+</body>
+
+</html>
